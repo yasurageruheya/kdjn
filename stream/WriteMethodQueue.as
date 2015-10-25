@@ -39,11 +39,11 @@
 					w.streamObject = streamObject;
 					++streamObject._queueCount;
 					w.methodName = methodName;
-					w.args = args;
+					w.args = args[0];
 					return w;
 				}
 			}
-			return new WriteMethodQueue(streamObject, methodName, args);
+			return new WriteMethodQueue(streamObject, methodName, args[0]);
 		}
 		
 		public var streamObject:StreamObject;
@@ -123,7 +123,7 @@
 					trace( "streamObject._queueCount : " + streamObject._queueCount );
 				dispatchEvent(new Event(Event.COMPLETE));
 			}
-			streamObject.dispatchEvent(new XOutputProgressEvent(XOutputProgressEvent.OUTPUT_PROGRESS, e.bytesPending, e.bytesTotal, e.bubbles, e.cancelable));
+			if(streamObject) streamObject.dispatchEvent(new XOutputProgressEvent(XOutputProgressEvent.OUTPUT_PROGRESS, e.bytesPending, e.bytesTotal, e.bubbles, e.cancelable));
 		}
 		
 		[Inline]

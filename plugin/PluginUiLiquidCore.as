@@ -26,7 +26,7 @@
 		[Inline]
 		final internal function initialize():void
 		{
-			_root = global.starlingRoot;
+			_root = global.starlingRoot as Sprite;
 			_flashStage = global.flashStage;
 			_ui = plugin.__ui;
 			plugin.addEventListener(ExPluginEvent.PLUGIN_BOOT, onPluginBootHandler);

@@ -85,7 +85,7 @@ class EnterFrameManagerSingleton
 	}
 	
 	/**
-	 * 特定のイベントタイプのリスナーオブジェクトを全て削除します。 例えば、引数 type に Event.EXIT_FRAME を指定すると、該当のイベントタイプだけのリスナーが全て削除されます。
+	 * 特定のイベントタイプのリスナーオブジェクトを全て削除します。 例えば、引数 type に Event.EXIT_FRAME を指定すると、 Event.EXIT_FRAME のタイプだけのリスナーが全て削除されます。
 	 * @param	type イベントタイプ名
 	 */
 	[Inline]

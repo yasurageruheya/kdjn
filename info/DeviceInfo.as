@@ -17,7 +17,7 @@ import flash.utils.getDefinitionByName;
 [Event(name="init", type="flash.events.Event")]
 class DeviceInfoSingleton extends EventDispatcher
 {
-	public const version:String = "2014/09/15 22:42";
+	public static const version:String = "2015/09/27 8:23";
 	
 	private var _isInitialized:Boolean = false;
 	[inline]
@@ -210,11 +210,63 @@ class DeviceInfoSingleton extends EventDispatcher
 	
 	public const isWorkerSupported:Boolean = WorkerClass ? WorkerClass.isSupported : false;
 	
+	private var _isInitializedOS:Boolean = false;
+	
+	[Inline]
+	final private function initializeOS():void
+	{
+		_isInitializedOS = true;
+		switch(Capabilities.version.substr(0, 3))
+		{
+			case "WIN": _isWindows = true; break;
+			case "IOS": _isiOS = true; break;
+			case "AND": _isAndroid = true; break;
+			case "QNX": _isBlackberry = true; break;
+			case "MAC": _isMac = true; break;
+			case "LNX": _isLinux = true; break;
+		}
+	}
+	
 	///
 	private var _isWindows:Boolean = false;
 	[inline]
-	final public function get isWindows():Boolean { return _isWindows; }
+	final public function get isWindows():Boolean
+	{
+		if (!_isInitializedOS) initializeOS();
+		return _isWindows;
+	}
+	///
+	private var _isAndroid:Boolean = false;
+	[inline]
+	final public function get isAndroid():Boolean
+	{
+		if (!_isInitializedOS) initializeOS();
+		return _isAndroid;
+	}
 	
+	private var _isLinux:Boolean = false;
+	[inline]
+	final public function get isLinux():Boolean
+	{
+		if (!_isInitializedOS) initializeOS();
+		return _isLinux;
+	}
+	
+	private var _isMac:Boolean = false;
+	[inline]
+	final public function get isMac():Boolean
+	{
+		if (!_isInitializedOS) initializeOS();
+		return _isMac;
+	}
+	
+	private var _isBlackberry:Boolean = false;
+	[Inline]
+	final public function get isBlackberry():Boolean
+	{
+		if (!_isInitializedOS) initializeOS();
+		return _isBlackberry;
+	}
 	
 	
 	///Windows 8.1
@@ -336,23 +388,6 @@ class DeviceInfoSingleton extends EventDispatcher
 	final public function get isWindowsMobile():Boolean { return _isWindowsMobile; }
 	
 	
-	/***********************************************************************
-	 * Android 系
-	 ***********************************************************************/
-	
-	///
-	private var _isAndroid:Boolean = false;
-	[inline]
-	final public function get isAndroid():Boolean { return _isAndroid; }
-	
-	private var _isLinux:Boolean = false;
-	[inline]
-	final public function get isLinux():Boolean { return _isLinux; }
-	
-	private var _isMac:Boolean = false;
-	[inline]
-	final public function get isMac():Boolean { return _isMac; }
-	
 	private var _osVersion:String;
 	[inline]
 	final public function get osVersion():String { return _osVersion; }
@@ -376,14 +411,41 @@ class DeviceInfoSingleton extends EventDispatcher
 	/***********************************************************************
 	 * 操作系
 	************************************************************************/
+	private var _isInitializedControlDevice:Boolean = false;
+	
+	[Inline]
+	final private function initializeControlDevice():void
+	{
+		_isInitializedControlDevice = true;
+		
+		switch(Capabilities.touchscreenType)
+		{
+			case TouchscreenType.FINGER:
+				_isTouchScreen = true;
+				break;
+			case TouchscreenType.STYLUS:
+				_isTouchPenScreen = true;
+				break;
+			default:
+		}
+	}
+	
 	///
 	private var _isTouchScreen:Boolean = false;
 	[Inline]
-	final public function get isTouchScreen():Boolean { return _isTouchScreen; }
+	final public function get isTouchScreen():Boolean
+	{
+		if (!_isInitializedControlDevice) initializeControlDevice();
+		return _isTouchScreen;
+	}
 	
 	private var _isTouchPenScreen:Boolean = false;
 	[Inline]
-	final public function get isTouchPenScreen():Boolean { return _isTouchPenScreen; }
+	final public function get isTouchPenScreen():Boolean
+	{
+		if (!_isInitializedControlDevice) initializeControlDevice();
+		return _isTouchPenScreen;
+	}
 	
 	/**
 	 * 第一引数 version に指定されたバージョン文字列が、現在 AIR を動かしている OS よりも新しいか、古いか、一致しているかを返します。
@@ -597,8 +659,8 @@ class DeviceInfoSingleton extends EventDispatcher
 			_windowsVersions[_windowsVersions.length] = WINDOWS_7;
 			_windowsVersions[_windowsVersions.length] = WINDOWS_SERVER_2008_R2;
 			_windowsVersions[_windowsVersions.length] = WINDOWS_8;
-			_windowsVersions[_windowsVersions.length] = WINDOWS_SERVER_2012;
 			_windowsVersions[_windowsVersions.length] = WINDOWS_8_1;
+			_windowsVersions[_windowsVersions.length] = WINDOWS_SERVER_2012;
 			_windowsVersions[_windowsVersions.length] = WINDOWS_SERVER_2012_R2;
 			
 			
@@ -781,17 +843,6 @@ class DeviceInfoSingleton extends EventDispatcher
 			
 			_isInitialized = true;
 			dispatchEvent(new Event(Event.INIT));
-		}
-		
-		switch(Capabilities.touchscreenType)
-		{
-			case TouchscreenType.FINGER:
-				_isTouchScreen = true;
-				break;
-			case TouchscreenType.STYLUS:
-				_isTouchPenScreen = true;
-				break;
-			default:
 		}
 		
 		//_isiOS = true;

@@ -4,6 +4,7 @@
 	import flash.events.IOErrorEvent;
 	import flash.events.SecurityErrorEvent;
 	import flash.external.ExternalInterface;
+	import flash.filesystem.File;
 	import flash.net.FileReference;
 	import flash.net.SharedObject;
 	import kdjn.data.cache.AirClass;
@@ -75,7 +76,7 @@
 			if (DeviceInfo.isAIR)
 			{
 				_applicationDirectory = fromPool(AirClass.FileClass.applicationDirectory.nativePath);
-				dtrace( "AirClass.FileClass.applicationDirectory.nativePath : " + AirClass.FileClass.applicationDirectory.nativePath );
+				//dtrace( "AirClass.FileClass.applicationDirectory.nativePath : " + AirClass.FileClass.applicationDirectory.nativePath );
 				return _applicationDirectory;
 			}
 			var app:String;
@@ -146,8 +147,32 @@
 			return null;
 		}
 		
+		private static var _rootDirectories:Vector.<XFile>;
+		[Inline]
+		public static function getRootDirectories():Vector.<XFile>
+		{
+			var vec:Vector.<XFile>;
+			if (AirClass.FileClass)
+			{
+				var arr:/*File*/Array = AirClass.FileClass["getRootDirectories"]();
+				var i:int = arr.length;
+				vec = new Vector.<XFile>(i);
+				while (i--)
+				{
+					vec[i] = XFile.fromPool(arr[i].nativePath);
+				}
+			}
+			else
+			{
+				if (_rootDirectories) return _rootDirectories;
+				_rootDirectories = new Vector.<XFile>([XFile.fromPool("/")]);
+				vec = _rootDirectories;
+			}
+			return vec;
+		}
 		
-		[inline]
+		
+		[Inline]
 		static private function externalInterfaceTest():String
 		{
 			try
@@ -161,7 +186,7 @@
 			return "";
 		}
 		
-		internal var _file:FileReference;
+		internal var _file:FileReference = null;
 		
 		
 		private var _exists:Boolean = false;
@@ -219,7 +244,15 @@
 		final private function onDirectoryListing(e:Event):void 
 		{
 			_file.removeEventListener(XFileListEvent.DIRECTORY_LISTING, onDirectoryListing);
-			dispatchEvent(new XFileListEvent(XFileListEvent.DIRECTORY_LISTING, e.bubbles, e.cancelable, e["files"] as Array));
+			var files:Array = e["files"] as Array;
+			var i:int = files.length;
+			var vec:Vector.<XFile> = new Vector.<XFile>(i);
+			while (i--)
+			{
+				vec[i] = XFile.fromPool(files[i]["nativePath"]);
+			}
+			
+			dispatchEvent(new XFileListEvent(XFileListEvent.DIRECTORY_LISTING, e.bubbles, e.cancelable, vec));
 		}
 
 		/**
@@ -255,7 +288,79 @@
 			
 		}
 		
-		private function onDispathedEvent(e:Event):void 
+		
+		[Inline]
+		final override public function get name():String
+		{
+			var name:String;
+			switch(true)
+			{
+				case _file != null: name = _file.name; break;
+				default: name = super.name;
+			}
+			return name;
+		}
+		
+		[Inline]
+		final public function get isDirectory():Boolean
+		{
+			var isDirectory:Boolean = false;
+			switch(true)
+			{
+				case _file != null: isDirectory = _file["isDirectory"]; break;
+				default:
+			}
+			return isDirectory;
+		}
+		
+		[Inline]
+		final public function get parent():XFile
+		{
+			var parent:XFile;
+			switch(true)
+			{
+				case _file != null: parent = XFile.fromPool(_file["parent"].nativePath); break;
+				default:
+			}
+			return parent;
+		}
+		
+		[Inline]
+		final public function deleteFileAsync():void
+		{
+			switch(true)
+			{
+				case _file != null:
+					_file.addEventListener(Event.COMPLETE, onFileDeleteComplete);
+					_file["deleteFileAsync"]();
+					break;
+				default:
+			}
+		}
+		
+		[Inline]
+		final override public function get size():Number
+		{
+			var size:Number;
+			switch(true)
+			{
+				case _file != null:
+					size = _file["size"];
+					break;
+				default:
+					size = super.size || 0;
+			}
+			return size;
+		}
+		
+		[Inline]
+		final private function onFileDeleteComplete(e:Event):void 
+		{
+			_file.removeEventListener(Event.COMPLETE, onFileDeleteComplete);
+			dispatchEvent(new Event(Event.COMPLETE));
+		}
+		
+		[Inline]final private function onDispathedEvent(e:Event):void 
 		{
 			_file["removeEventListener"](SecurityErrorEvent.SECURITY_ERROR, onDispathedEvent);
 			_file["removeEventListener"](IOErrorEvent.IO_ERROR, onDispathedEvent);

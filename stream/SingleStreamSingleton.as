@@ -1,6 +1,5 @@
 ﻿package kdjn.stream 
 {
-	import com.greensock.events.LoaderEvent;
 	import flash.display.Loader;
 	import flash.display.LoaderInfo;
 	import flash.events.Event;
@@ -22,7 +21,7 @@
 	 */
 	internal class SingleStreamSingleton extends EventDispatcher
 	{
-		public static const version:String = "2014/09/12 18:10";
+		public static const version:String = "2015/10/09 12:02";
 		
 		private static const temporaryDictionary:Dictionary = new Dictionary();
 		
@@ -48,7 +47,7 @@
 		[Inline]
 		final private function onSwfBinaryLoaded(e:Event):void 
 		{
-			dtrace( "onSwfBinaryLoaded : " + onSwfBinaryLoaded );
+			//dtrace( "onSwfBinaryLoaded : " + onSwfBinaryLoaded );
 			var stream:StreamObject = e.currentTarget as StreamObject,
 				fileStream:XFileStream = stream.fileStream,
 				loader:Loader = stream.data.loader as Loader,

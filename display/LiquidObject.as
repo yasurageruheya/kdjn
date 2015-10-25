@@ -61,7 +61,7 @@ package kdjn.display
 		
 		private function reset(target:DisplayObject, compare:DisplayObject):LiquidObject
 		{
-			const	compareRect:Rectangle = compare.getBounds(compare.parent || global.starlingRoot),
+			const	compareRect:Rectangle = compare.getBounds(compare.parent || global.starlingRoot as DisplayObject),
 					targetRect:Rectangle = ShareInstance.rectangle(target.x, target.y, target.width, target.height);
 			this.fromInnerLeft = targetRect.x - compareRect.x;
 			this.fromInnerTop = target

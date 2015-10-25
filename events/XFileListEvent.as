@@ -1,12 +1,14 @@
 package kdjn.events 
 {
 	import flash.events.Event;
+	import kdjn.filesystem.XFile;
 	/**
 	 * ...
 	 * @author ...
 	 */
 	public class XFileListEvent extends Event
 	{
+		public static const version:String = "2015/10/08 21:43";
 		/**
 		 * FileListEvent.DIRECTORY_LISTING 定数は、type プロパティ（directoryListing イベントのイベントオブジェクト）の値を定義します。
 		 * 
@@ -21,7 +23,7 @@ package kdjn.events
 		 *   File.getDirectoryListingAsync() メソッドの場合、これはメソッドを呼び出した File オブジェクトによって表されるディレクトリのルートレベルで見つかったファイルとディレクトリのリストです。File.browseForOpenMultiple() メソッドの場合、ユーザーが選択したファイルのリストです。
 		 * @playerversion	AIR 1.0
 		 */
-		public var files : Array;
+		public var files : Vector.<XFile>;
 
 		/**
 		 * FileListEvent.SELECT_MULTIPLE 定数は、type プロパティ（selectMultiple イベントのイベントオブジェクト）の値を定義します。
@@ -41,7 +43,7 @@ package kdjn.events
 		 * @param	files	File オブジェクトの配列です。
 		 * @playerversion	AIR 1.0
 		 */
-		public function XFileListEvent (type:String, bubbles:Boolean = false, cancelable:Boolean = false, files:Array = null)
+		public function XFileListEvent (type:String, bubbles:Boolean = false, cancelable:Boolean = false, files:Vector.<XFile> = null)
 		{
 			super(type, bubbles, cancelable);
 			this.files = files;

@@ -10,7 +10,6 @@ import flash.display.DisplayObject;
 import flash.display.Stage;
 import flash.events.Event;
 import flash.events.EventDispatcher;
-import starling.display.Sprite;
 
 [Event(name="init", type="flash.events.Event")]
 class GlobalSingleton extends EventDispatcher
@@ -19,7 +18,7 @@ class GlobalSingleton extends EventDispatcher
 	
 	public var flashStage:Stage;
 	
-	public var starlingRoot:Sprite;
+	public var starlingRoot:/*starling.display.Sprite*/*;
 	
 	private var _root:DisplayObject
 	
