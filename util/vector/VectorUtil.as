@@ -21,7 +21,7 @@ package kdjn.util.vector
 		public static function getIsAllSameValue(value:*, vec:Vector.<*>):Boolean
 		{
 			_target = value;
-			return vec.every(isAllZeroFromEvery);
+			return vec.every(isAllSameValueFromEvery);
 		}
 		
 		[Inline]
@@ -101,6 +101,18 @@ package kdjn.util.vector
 				className = getQualifiedClassName(value);
 			}
 			return getDefinitionByName("__AS3__.vec::Vector.<" + className + ">") as Class;
+		}
+		
+		[Inline]
+		public static function toArray(vec:*):Array 
+		{
+			var arr:Array = [];
+			var i:int = vec.length;
+			while (i--)
+			{
+				arr[i] = vec[i];
+			}
+			return arr;
 		}
 		
 		/**

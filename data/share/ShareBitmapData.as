@@ -4,6 +4,7 @@ package kdjn.data.share
 	import flash.display.BitmapData;
 	import flash.utils.Dictionary;
 	import jp.shichiseki.exif.ExifInfo;
+	import kdjn.util.obj.ObjectUtil;
 	/**
 	 * ...
 	 * @author 工藤潤
@@ -87,7 +88,7 @@ package kdjn.data.share
 		public function dispose(user:Object):void
 		{
 			delete users[user];
-			if (!getObjectLength(users))
+			if (!ObjectUtil.getLength(users))
 			{
 				_bmd.dispose();
 				delete _pool[this._key];

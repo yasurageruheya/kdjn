@@ -40,7 +40,7 @@ package kdjn.data.pool.display
 			return new Loader();
 		}
 		
-		[Inline]
+		//[Inline]
 		public static function toPool(b:Loader, gc:Boolean=true):void
 		{
 			if (!_dic[b])
