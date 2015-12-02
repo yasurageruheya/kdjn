@@ -66,5 +66,15 @@ package kdjn.util
 			
 			return beforeMemory - afterMemory;
 		}
+		
+		
+		[Inline]
+		public static function removeFromParent(target:DisplayObject):void
+		{
+			if (target.parent)
+			{
+				target.parent.removeChild(target);
+			}
+		}
 	}
 }

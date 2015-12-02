@@ -4,7 +4,6 @@
 	import flash.events.IOErrorEvent;
 	import flash.events.SecurityErrorEvent;
 	import flash.external.ExternalInterface;
-	import flash.filesystem.File;
 	import flash.net.FileReference;
 	import flash.net.SharedObject;
 	import kdjn.data.cache.AirClass;
@@ -115,7 +114,14 @@
 			}
 			else
 			{
-				SharedObject.preventBackup = false;
+				if (typeof SharedObject["preventBackup"] === "undefined")
+				{
+					
+				}
+				else
+				{
+					SharedObject["preventBackup"] = false;
+				}
 				_applicationStorageDirectory = fromPool(SOL + "applicationStorage");
 			}
 			
@@ -172,7 +178,7 @@
 		}
 		
 		
-		[Inline]
+		//[Inline]
 		static private function externalInterfaceTest():String
 		{
 			try
@@ -205,6 +211,8 @@
 		[inline]
 		final public function resolvePath(path:String):XFile
 		{
+			if (!path) return this;
+			
 			if (_file) return fromPool(_file["resolvePath"](path).nativePath);
 			
 			var resultPath:Array = _nativePath.split(separator);
