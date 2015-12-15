@@ -28,7 +28,17 @@ class DeviceInfoSingleton extends EventDispatcher
 	[inline]
 	final public function get WorkerClass():Class
 	{
-		if (!_WorkerClass) _WorkerClass = getDefinitionByName("flash.system.Worker") as Class
+		if (typeof _WorkerClass === "undefined")
+		{
+			try
+			{
+				_WorkerClass = getDefinitionByName("flash.system.Worker") as Class;
+			}
+			catch (e:Error)
+			{
+				_WorkerClass = null;
+			}
+		}
 		return _WorkerClass;
 	}
 	
@@ -47,6 +57,11 @@ class DeviceInfoSingleton extends EventDispatcher
 	public const isBrowser:Boolean = getIsBrowser();
 	[Inline]
 	private static function getIsBrowser():Boolean { return ExternalInterface.available; }
+	
+	
+	public const isStandAlone:Boolean = getIsStandAlone();
+	[Inline]
+	private static function getIsStandAlone():Boolean { return (Capabilities.playerType === "StandAlone") as Boolean; }
 	
 	
 	/**************************************************************************

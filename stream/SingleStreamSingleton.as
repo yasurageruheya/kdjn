@@ -28,11 +28,14 @@
 		///同時アクセス制限数
 		public var maxConnections:int = 2;
 		
-		internal var currentConnections:int = 0;
+		internal var _currentConnections:int = 0;
 		
-		public function openAsync(file:XFile, fileMode:String = 'read', data:* = null):StreamObject
+		[Inline]
+		final public function get currentConnections():int { return _currentConnections; }
+		
+		final public function openAsync(file:XFile, fileMode:String = 'read', data:* = null, isLoadStartLater:Boolean = false):StreamObject
 		{
-			return _reader.load(file, fileMode, data);
+			return _reader.load(file, fileMode, data, isLoadStartLater);
 		}
 		
 		[Inline]

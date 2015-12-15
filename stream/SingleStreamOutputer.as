@@ -18,7 +18,7 @@
 		final public function addOutputQueue(target:StreamObject, methodName:String, ...args):StreamObject
 		{
 			var queue:WriteMethodQueue = WriteMethodQueue.fromPool(target, methodName, args);
-			if (SingleStream.maxConnections > SingleStream.currentConnections) writeStart(queue);
+			if (SingleStream.maxConnections > SingleStream._currentConnections) writeStart(queue);
 			else _queues[_queues.length] = queue;
 			return queue.streamObject;
 		}
@@ -26,7 +26,7 @@
 		[Inline]
 		final private function writeStart(queue:WriteMethodQueue):void
 		{
-			SingleStream.currentConnections++;
+			SingleStream._currentConnections++;
 			queue.addEventListener(Event.COMPLETE, onWriteCompleteHandler);
 			queue.run();
 		}
@@ -51,7 +51,7 @@
 			var queue:WriteMethodQueue = e.currentTarget as WriteMethodQueue;
 			queue.removeEventListener(Event.COMPLETE, onWriteCompleteHandler);
 			queue.toPool();
-			SingleStream.currentConnections--;
+			SingleStream._currentConnections--;
 			if (!queueCheck()) SingleStream._reader.queueCheck();
 		}
 		

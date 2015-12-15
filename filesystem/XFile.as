@@ -62,6 +62,7 @@
 		{
 			if (DeviceInfo.isAIR) return AirClass.FileClass.separator as String;
 			else if (DeviceInfo.isBrowser) return "/";
+			else if (DeviceInfo.isStandAlone) return "/";
 			else if (DeviceInfo.isWindows) return "\\";
 			else return"/";
 		}

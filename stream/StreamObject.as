@@ -22,6 +22,7 @@ package kdjn.stream
 	[Event(name="outputComplete", type="kdjn.stream.events.SingleStreamEvent")]
 	[Event(name="allOutputComplete", type="kdjn.stream.events.SingleStreamEvent")]
 	[Event(name="complete", type="flash.events.Event")]
+	[Event(name="open", type="flash.events.Event")]
 	[Event(name="outputProgress", type="kdjn.events.XOutputProgressEvent")]
 	[Event(name="progress", type="flash.events.ProgressEvent")]
 	[Event(name="ioError", type="flash.events.IOErrorEvent")]
@@ -66,11 +67,19 @@ package kdjn.stream
 		final internal function openAsync(file:XFile, fileMode:String, data:*): void
 		{
 			this.data = data;
+			_stream.addEventListener(Event.OPEN, onStreamLoadStartHandler);
 			_stream.addEventListener(Event.COMPLETE, onStreamOpenHandler);
 			_stream.addEventListener(ProgressEvent.PROGRESS, onStreamProgressHandler);
 			_stream.addEventListener(IOErrorEvent.IO_ERROR, onStreamIoErrorHandler);
 			_stream.addEventListener(ErrorEvent.ERROR, onStreamErrorHandler);
 			_stream.openAsync(file, fileMode);
+		}
+		
+		[Inline]
+		final private function onStreamLoadStartHandler(e:Event):void 
+		{
+			_stream.removeEventListener(Event.OPEN, onStreamLoadStartHandler);
+			dispatchEvent(new Event(Event.OPEN));
 		}
 		
 		private function onStreamErrorHandler(e:ErrorEvent):void 
@@ -93,9 +102,11 @@ package kdjn.stream
 		[Inline]
 		final private function removeStreamEventListeners():void
 		{
+			_stream.removeEventListener(Event.OPEN, onStreamLoadStartHandler);
 			_stream.removeEventListener(Event.COMPLETE, onStreamOpenHandler);
 			_stream.removeEventListener(ProgressEvent.PROGRESS, onStreamProgressHandler);
 			_stream.removeEventListener(IOErrorEvent.IO_ERROR, onStreamIoErrorHandler);
+			_stream.removeEventListener(ErrorEvent.ERROR, onStreamErrorHandler);
 		}
 		
 		[Inline]

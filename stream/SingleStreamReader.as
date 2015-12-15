@@ -2,6 +2,7 @@
 {
 	import flash.events.Event;
 	import flash.events.EventDispatcher;
+	import flash.events.IOErrorEvent;
 	import kdjn.display.debug.dtrace;
 	import kdjn.filesystem.XFile;
 	import kdjn.filesystem.XFileStream;
@@ -22,11 +23,11 @@
 		final public function get queueCount():int { return _queues.length; }
 		
 		[Inline]
-		final public function load(file:XFile, fileMode:String='read', data:* = null):StreamObject
+		final public function load(file:XFile, fileMode:String='read', data:* = null, isLoadStartLater:Boolean = false):StreamObject
 		{
 			var	stream:StreamObject = StreamObject.fromPool(XFileStream.fromPool()),
 				queue:SingleStreamQueue = SingleStreamQueue.fromPool(file, fileMode, stream, data);
-			if (SingleStream.maxConnections > SingleStream.currentConnections) loadStart(queue);
+			if (SingleStream.maxConnections > SingleStream._currentConnections) loadStart(queue);
 			else _queues[_queues.length] = queue;
 			return stream;
 		}
@@ -34,9 +35,10 @@
 		[Inline]
 		final private function loadStart(queue:SingleStreamQueue):void
 		{
-			SingleStream.currentConnections++;
+			SingleStream._currentConnections++;
 			var stream:StreamObject = queue.streamObject;
 			stream.addEventListener(Event.COMPLETE, onFileOpenCompleteHandler);
+			stream.addEventListener(IOErrorEvent.IO_ERROR, onFileOpenCompleteHandler);
 			stream.openAsync(queue.file, queue.fileMode, queue.temp_data);
 			queue.toPool();
 		}
@@ -60,7 +62,7 @@
 		{
 			var stream:StreamObject = e.currentTarget as StreamObject;
 			stream.removeEventListener(Event.COMPLETE, onFileOpenCompleteHandler);
-			SingleStream.currentConnections--;
+			SingleStream._currentConnections--;
 			if (!queueCheck()) SingleStream._outputer.queueCheck();
 		}
 		

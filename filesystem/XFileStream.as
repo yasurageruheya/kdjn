@@ -36,6 +36,7 @@
 	[Event(name="progress", type="flash.events.ProgressEvent")]
 	[Event(name="ioError", type="flash.events.IOErrorEvent")]
 	[Event(name="error", type="flash.events.ErrorEvent")]
+	[Event(name="open", type="flash.events.Event")]
 	public class XFileStream extends EventDispatcher implements IDataInput, IDataOutput
 	{
 		public static const version:String = "2015/01/28 18:09";
@@ -62,6 +63,7 @@
 				if (!x._fileMode)
 				{
 					x._fileMode = _ALIVE;
+					x._isDispathOpenHandler = false;
 					return x;
 				}
 			}
@@ -147,12 +149,13 @@
 		 * ファイルでの現在の位置です。
 		 * 
 		 *   この値は、次のいずれかの方法で変更されます。プロパティを明示的に設定したとき(いずれかの読み取りメソッドを使用して) FileStream オブジェクトから読み取るときFileStream オブジェクトに書き込むとき位置は、232 バイトを超える長さのファイルをサポートするために、（uint ではなく）Number として定義されます。このプロパティの値は、常に 253 未満の整数です。この値を小数部を持つ数値に設定した場合は、最も近い整数に切り捨てられます。ファイルを非同期で読み取ると、position プロパティを設定した場合、アプリケーションが読み取りバッファーに指定された位置から始まるデータの埋め込みを開始し、bytesAvailable プロパティが 0 に設定される可能性があります。読み取りメソッドを使ってデータを読み取る前に complete イベントを待つか、または読み取りメソッドを使う前に progress イベントを待って bytesAvailable プロパティをチェックします。
+		 *   AIR では無い FlashPlayer 11.3 以下の場合、このプロパティは必ず 0 を返します。
 		 * @playerversion	AIR 1.0
 		 */
 		[inline]
 		final public function get position () : Number
 		{
-			if (_urlStream) return _urlStream.position;
+			if (_urlStream) return _urlStream["position"] || 0;
 			if (_sharedObject) return _bytes.position;
 			if (_fileStream) return _fileStream["position"] as uint;
 			if (_bytes) return _bytes.position;
@@ -162,7 +165,7 @@
 		[inline]
 		final public function set position (value:Number) : void
 		{
-			if (_urlStream) _urlStream.position = value;
+			if (_urlStream && typeof _urlStream["position"] !== "undefined") _urlStream["position"] = value;
 			else if (_sharedObject) _bytes.position = value;
 			else if (_fileStream) _fileStream["position"] = value;
 			else if (_bytes) _bytes.position = value;
@@ -765,6 +768,7 @@
 						_urlStream.addEventListener(ProgressEvent.PROGRESS, onReadProgressHandler);
 						_urlStream.addEventListener(Event.COMPLETE, onUrlStreamCompleteHandler);
 						_urlStream.addEventListener(IOErrorEvent.IO_ERROR, onUrlStreamIoErrorHandler);
+						_urlStream.addEventListener(Event.OPEN, onUrlStreamOpenHandler);
 						_urlStream.load(new URLRequest(file.nativePath));
 						break;
 					case XFileMode.WRITE:
@@ -786,6 +790,12 @@
 			}
 		}
 		
+		[Inline]
+		final private function onUrlStreamOpenHandler(e:Event):void 
+		{
+			dispatchEvent(new Event(Event.OPEN));
+		}
+		
 		private function onUrlStreamIoErrorHandler(e:IOErrorEvent):void 
 		{
 			removeUrlStreamEventListeners();
@@ -803,11 +813,17 @@
 			_urlStream.removeEventListener(ProgressEvent.PROGRESS, onReadProgressHandler);
 			_urlStream.removeEventListener(Event.COMPLETE, onUrlStreamCompleteHandler);
 			_urlStream.removeEventListener(IOErrorEvent.IO_ERROR, onUrlStreamIoErrorHandler);
+			_urlStream.removeEventListener(Event.OPEN, onUrlStreamOpenHandler);
 		}
 		
 		[Inline]
 		final private function onReadProgressHandler(e:ProgressEvent):void 
 		{
+			if (!_isDispathOpenHandler)
+			{
+				_isDispathOpenHandler = true;
+				dispatchEvent(new Event(Event.OPEN));
+			}
 			dispatchEvent(new ProgressEvent(ProgressEvent.PROGRESS, false, false, e.bytesLoaded, e.bytesTotal));
 		}
 		
@@ -980,14 +996,14 @@
 		
 		private var _sharedObject:SharedObject;
 		
+		private var _isDispathOpenHandler:Boolean = false;
+		
 		[Inline]
 		final public function toPool():void
 		{
 			if (_fileMode)
 			{
 				_fileMode = "";
-				//if (_fileStream) _fileStream = null;
-				//if (_urlStream) _urlStream = null;
 				if (_urlLoader)
 				{
 					if (_urlLoader.data)
@@ -995,7 +1011,6 @@
 						_urlLoader.data.length = 0;
 						_urlLoader.data = null;
 					}
-					//_urlLoader = null;
 				}
 				if (_urlRequest)
 				{

@@ -31,16 +31,8 @@ class GlobalSingleton extends EventDispatcher
 	final public function initialize(root:DisplayObject):void
 	{
 		_root = root;
-		if (root.stage)
-		{
-			flashStage = root.stage;
-			_isInitialized = true;
-			dispatchEvent(new Event(Event.INIT));
-		}
-		else
-		{
-			root.addEventListener(Event.ADDED_TO_STAGE, onAddToStageHandler);
-		}
+		root.addEventListener(Event.ADDED_TO_STAGE, onAddToStageHandler);
+		if (root.stage) dispatchEvent(new Event(Event.INIT));
 	}
 	
 	[inline]

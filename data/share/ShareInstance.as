@@ -1,21 +1,21 @@
 ﻿package kdjn.data.share 
 {
-	import flash.display.JPEGEncoderOptions;
-	import flash.display.JPEGXREncoderOptions;
-	import flash.display.PNGEncoderOptions;
 	import flash.geom.ColorTransform;
 	import flash.geom.Matrix;
 	import flash.geom.Point;
 	import flash.geom.Rectangle;
 	import flash.net.URLLoader;
 	import flash.system.ApplicationDomain;
-	import flash.system.ImageDecodingPolicy;
 	import flash.system.JPEGLoaderContext;
 	import flash.system.LoaderContext;
 	import flash.system.SecurityDomain;
 	import flash.utils.ByteArray;
 	import flash.utils.getDefinitionByName;
 	import kdjn.data.cache.ClassCache;
+	import kdjn.display.XJPEGEncoderOptions;
+	import kdjn.display.XJPEGXREncoderOptions;
+	import kdjn.display.XPNGEncoderOptions;
+	import kdjn.system.XImageDecodingPolicy;
 	import kdjn.worker.WorkerManager;
 	/**
 	 * ちなみに、プリミティブではないインスタンスは、 const で定義してもアクセス速度が変わるわけではありません。 const でアクセス速度が変わるのは、あくまで、 Number や String などのプリミティブ型と呼ばれる物のみです。
@@ -110,7 +110,7 @@
 		{
 			var loaderContext:LoaderContext = new LoaderContext(false, ApplicationDomain.currentDomain);
 			loaderContext.allowCodeImport = true;
-			loaderContext.imageDecodingPolicy = ImageDecodingPolicy.ON_LOAD;
+			if (loaderContext.hasOwnProperty("imageDecodingPolicy")) loaderContext["imageDecodingPolicy"] = XImageDecodingPolicy.ON_LOAD;
 			return loaderContext;
 		}
 		
@@ -140,27 +140,27 @@
 			_jpegLoaderContext.checkPolicyFile = checkPolicyFile;
 			_jpegLoaderContext.applicationDomain = applicationDomain;
 			_jpegLoaderContext.securityDomain = securityDomain;
-			_jpegLoaderContext.imageDecodingPolicy = ImageDecodingPolicy.ON_LOAD;
+			if(_jpegLoaderContext.hasOwnProperty("imageDecodingPolicy")) _jpegLoaderContext["imageDecodingPolicy"] = XImageDecodingPolicy.ON_LOAD;
 			return _jpegLoaderContext;
 		}
 		
-		private static var _jpegEncoderOptions:JPEGEncoderOptions;
+		private static var _jpegEncoderOptions:XJPEGEncoderOptions;
 		
 		/**
-		 * JPEGEncoderOptions クラスは <codeph class="+ topic/ph pr-d/codeph ">flash.display.BitmapData.encode()</codeph> メソッドのための圧縮アルゴリズムを定義します。
+		 * XJPEGEncoderOptions クラスは <codeph class="+ topic/ph pr-d/codeph ">flash.display.BitmapData.encode()</codeph> メソッドのための圧縮アルゴリズムを定義します。
 		 * @param	quality 1 ～ 100 の範囲の値です。1 が最低品質、100 が最高品質を意味します。値を大きくするほど、圧縮結果の出力サイズは大きくなり、圧縮率は小さくなります。
 		 * @return
 		 */
-		[inline]
-		public static function jpegEncoderOptions(quality:uint):JPEGEncoderOptions
+		//[inline]
+		public static function jpegEncoderOptions(quality:uint = 80):XJPEGEncoderOptions
 		{
-			if (!_jpegEncoderOptions) return (_jpegEncoderOptions = new JPEGEncoderOptions(quality));
+			if (!_jpegEncoderOptions) return (_jpegEncoderOptions = XJPEGEncoderOptions.fromPool(quality));
 			_jpegEncoderOptions.quality = quality;
 			return _jpegEncoderOptions;
 		}
 		
 		
-		private static var _jpegXrEncoderOptions:JPEGXREncoderOptions;
+		private static var _jpegXrEncoderOptions:XJPEGXREncoderOptions;
 		
 		/**
 		 * JPEGXREncoderOptions クラスは <codeph class="+ topic/ph pr-d/codeph ">flash.display.BitmapData.encode()</codeph> メソッドのための圧縮アルゴリズムを定義します。
@@ -169,10 +169,10 @@
 		 * @param	trimFlexBits 量子化後に切り捨てられる余分なエントロピーデータの量を決定します。このプロパティは画質に影響を及ぼすものであり、デフォルト値のままにしておくのが一般的です。
 		 * @return
 		 */
-		[inline]
-		public static function jpegXrEncoderOptions(quantization:uint=20, colorSpace:String="auto", trimFlexBits:uint=0):JPEGXREncoderOptions
+		//[inline]
+		public static function jpegXrEncoderOptions(quantization:uint = 20, colorSpace:String = "auto", trimFlexBits:uint = 0):XJPEGXREncoderOptions
 		{
-			if (!_jpegXrEncoderOptions) return (_jpegXrEncoderOptions = new JPEGXREncoderOptions(quantization, colorSpace, trimFlexBits));
+			if (!_jpegXrEncoderOptions) return (_jpegXrEncoderOptions = XJPEGXREncoderOptions.fromPool(quantization, colorSpace, trimFlexBits));
 			_jpegXrEncoderOptions.quantization = quantization;
 			_jpegXrEncoderOptions.colorSpace = colorSpace;
 			_jpegXrEncoderOptions.trimFlexBits = trimFlexBits;
@@ -180,17 +180,17 @@
 		}
 		
 		
-		private static var _pngEncoderOptions:PNGEncoderOptions;
+		private static var _pngEncoderOptions:XPNGEncoderOptions;
 		
 		/**
 		 * PNGEncoderOptions クラスは <codeph class="+ topic/ph pr-d/codeph ">flash.display.BitmapData.encode()</codeph> メソッドのための圧縮アルゴリズムを定義します。
 		 * @param	fastCompression ファイルサイズよりも圧縮速度を優先します。このプロパティを設定すると、圧縮速度は向上しますが生成されるファイルサイズが大きくなります。
 		 * @return
 		 */
-		[inline]
-		public static function pngEncoderOptions(fastCompression:Boolean=false):PNGEncoderOptions
+		//[inline]
+		public static function pngEncoderOptions(fastCompression:Boolean=false):XPNGEncoderOptions
 		{
-			if (!_pngEncoderOptions) return (_pngEncoderOptions = new PNGEncoderOptions(fastCompression));
+			if (!_pngEncoderOptions) return (_pngEncoderOptions = XPNGEncoderOptions.fromPool(fastCompression));
 			_pngEncoderOptions.fastCompression = fastCompression;
 			return _pngEncoderOptions;
 		}
@@ -221,7 +221,6 @@
 			if (!_date)
 			{
 				_date = new Date(time);
-				//return _date; //←なぜかここで java 側のコンパイルエラーが出るのでコメントアウト
 			}
 			_date.time = time;
 			return _date;
